@@ -1,10 +1,10 @@
 import os
 import cv2
-import copy
 import numpy as np
 from keras.utils import Sequence
 from imageai.Detection.Custom.utils.bbox import BoundBox, bbox_iou
 from imageai.Detection.Custom.utils.image import apply_random_scale_and_crop, random_distort_image, random_flip, correct_bounding_boxes
+
 
 class BatchGenerator(Sequence):
     def __init__(self, 
@@ -34,7 +34,8 @@ class BatchGenerator(Sequence):
         self.net_h              = 416  
         self.net_w              = 416
 
-        if shuffle: np.random.shuffle(self.instances)
+        if shuffle:
+            np.random.shuffle(self.instances)
             
     def __len__(self):
         return int(np.ceil(float(len(self.instances))/self.batch_size))           

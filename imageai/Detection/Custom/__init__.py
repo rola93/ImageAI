@@ -1236,7 +1236,9 @@ class CustomDetectionUtils:
         nb_box = 3
         netout = netout.reshape((grid_h, grid_w, nb_box, -1))
         nb_class = netout.shape[-1] - 5
+
         boxes = []
+
         netout[..., :2] = self._sigmoid(netout[..., :2])
         netout[..., 4:] = self._sigmoid(netout[..., 4:])
         netout[..., 5:] = netout[..., 4][..., np.newaxis] * netout[..., 5:]
