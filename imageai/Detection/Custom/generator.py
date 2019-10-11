@@ -1,3 +1,4 @@
+import os
 import cv2
 import copy
 import numpy as np
@@ -229,4 +230,8 @@ class BatchGenerator(Sequence):
         return np.array(annots)
 
     def load_image(self, i):
-        return cv2.imread(self.instances[i]['filename'])  # BGR image
+        img = cv2.imread(self.instances[i]['filename'])  # BGR image
+        if img is None:
+            print(f"{i}: Can not read image file from {self.instances[i]['filename']}")
+            print('is file: ', os.path.isfile(self.instances[i]['filename']))
+        return img  # BGR image

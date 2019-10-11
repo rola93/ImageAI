@@ -145,10 +145,26 @@ def correct_yolo_boxes(boxes, image_h, image_w, net_h, net_w):
         x_offset, x_scale = (net_w - new_w)/2./net_w, float(new_w)/net_w
         y_offset, y_scale = (net_h - new_h)/2./net_h, float(new_h)/net_h
         
-        boxes[i].xmin = int((boxes[i].xmin - x_offset) / x_scale * image_w)
-        boxes[i].xmax = int((boxes[i].xmax - x_offset) / x_scale * image_w)
-        boxes[i].ymin = int((boxes[i].ymin - y_offset) / y_scale * image_h)
-        boxes[i].ymax = int((boxes[i].ymax - y_offset) / y_scale * image_h)
+        if x_scale == 0:
+            print('x_scale is zero', x_scale, image_h, image_w, net_h, net_w)
+            x_scale=1e-5
+        if y_scale == 0:
+            print('y_scale is zero', y_scale, image_h, image_w, net_h, net_w)
+            y_scale=1e-5
+        try:
+            boxes[i].xmin = int((boxes[i].xmin - x_offset) / x_scale * image_w)
+            boxes[i].xmax = int((boxes[i].xmax - x_offset) / x_scale * image_w)
+            boxes[i].ymin = int((boxes[i].ymin - y_offset) / y_scale * image_h)
+            boxes[i].ymax = int((boxes[i].ymax - y_offset) / y_scale * image_h)
+        except Exception as e:
+            print('#'*10)
+            print(e)
+            print(boxes[i].xmin, x_offset, x_scale, image_w)
+            print(boxes[i].xmax, x_offset, x_scale, image_w)
+            print(boxes[i].ymin, y_offset, y_scale, image_h)
+            print(boxes[i].ymax, y_offset, y_scale, image_h)
+            continue
+            
         
 
 def do_nms(boxes, nms_thresh):
@@ -241,7 +257,7 @@ def normalize(image):
 
 
 def get_yolo_boxes(model, images, net_h, net_w, anchors, obj_thresh, nms_thresh):
-    image_h, image_w, _ = images[0].shape
+
     nb_images           = len(images)
     batch_input         = np.zeros((nb_images, net_h, net_w, 3))
 
@@ -262,6 +278,7 @@ def get_yolo_boxes(model, images, net_h, net_w, anchors, obj_thresh, nms_thresh)
             yolo_anchors = anchors[(2-j)*6:(3-j)*6] # config['model']['anchors']
             boxes += decode_netout(yolos[j], yolo_anchors, obj_thresh, net_h, net_w)
 
+        image_h, image_w = images[i].shape[:2]
         # correct the sizes of the bounding boxes
         correct_yolo_boxes(boxes, image_h, image_w, net_h, net_w)
 

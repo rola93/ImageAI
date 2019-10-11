@@ -17,6 +17,7 @@ from keras.models import load_model, Input
 from keras.callbacks import TensorBoard
 import keras.backend as K
 import cv2
+import traceback
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
@@ -387,8 +388,9 @@ class DetectionModelTrainer:
         for model_file in model_files:
             if str(model_file).endswith(".h5"):
                 try:
-                    infer_model = load_model(model_file)
-
+                    print('Loading model from file... ', model_file)
+                    infer_model = load_model(model_file, False)
+                    print('Evaluating model...', model_file)
                     ###############################
                     #   Run the evaluation
                     ###############################
@@ -417,11 +419,18 @@ class DetectionModelTrainer:
 
                     print('mAP: {:.4f}'.format(sum(average_precisions.values()) / len(average_precisions)))
                     result_dict['map'] = sum(average_precisions.values()) / len(average_precisions)
+
                     print("===============================")
 
                     results.append(result_dict)
                 except Exception as e:
+                    traceback.print_exc(e)
+                    print('='*20)
+                    print(traceback.format_tb(e.__traceback__))
+                    print('-'*20)
+                    print(traceback.format_exc(e))
                     print('skipping the evaluation of {} because following exception occurred: {}'.format(model_file, e))
+                    print('#'*20)
                     continue
             else:
                 print('skipping the evaluation of {} since it\'s not a .h5 file'.format(model_file))
