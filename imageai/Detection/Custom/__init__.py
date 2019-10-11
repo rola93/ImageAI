@@ -424,11 +424,11 @@ class DetectionModelTrainer:
 
                     results.append(result_dict)
                 except Exception as e:
-                    traceback.print_exc(e)
-                    print('='*20)
                     print(traceback.format_tb(e.__traceback__))
                     print('-'*20)
                     print(traceback.format_exc(e))
+                    print('=' * 20)
+                    traceback.print_exc(e)
                     print('skipping the evaluation of {} because following exception occurred: {}'.format(model_file, e))
                     print('#'*20)
                     continue

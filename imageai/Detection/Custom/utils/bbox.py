@@ -11,7 +11,7 @@ class BoundBox:
         self.ymax = ymax
         
         self.c       = c
-        self.classes = classes
+        self.classes = classes  # List[float]
 
         self.label = -1
         self.score = -1

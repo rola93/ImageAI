@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import os
+from typing import List
 from .bbox import BoundBox, bbox_iou
 from scipy.special import expit
 
@@ -150,7 +151,9 @@ def correct_yolo_boxes(boxes, image_h, image_w, net_h, net_w):
         boxes[i].ymin = int((boxes[i].ymin - y_offset) / y_scale * image_h)
         boxes[i].ymax = int((boxes[i].ymax - y_offset) / y_scale * image_h)
         
-def do_nms(boxes, nms_thresh):
+
+def do_nms(boxes: List[BoundBox], nms_thresh: float):
+
     if len(boxes) > 0:
         nb_class = len(boxes[0].classes)
     else:
@@ -162,7 +165,8 @@ def do_nms(boxes, nms_thresh):
         for i in range(len(sorted_indices)):
             index_i = sorted_indices[i]
 
-            if boxes[index_i].classes[c] == 0: continue
+            if boxes[index_i].classes[c] == 0:
+                continue
 
             for j in range(i+1, len(sorted_indices)):
                 index_j = sorted_indices[j]
@@ -183,6 +187,11 @@ def decode_netout(netout, anchors, obj_thresh, net_h, net_w):
     netout[..., 4]   = _sigmoid(netout[..., 4])
     netout[..., 5:]  = netout[..., 4][..., np.newaxis] * _softmax(netout[..., 5:])
     netout[..., 5:] *= netout[..., 5:] > obj_thresh
+
+    if np.any(np.isinf(netout)):
+        print(netout.shape)
+        print(netout)
+        netout[np.isinf(netout)] = netout.max() * 10
 
     for i in range(grid_h*grid_w):
         row = i // grid_w
